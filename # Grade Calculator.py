@@ -1,4 +1,4 @@
-#
+
 
 math = float(input("Enter Math marks: "))
 science = float(input("Enter Science marks: "))
