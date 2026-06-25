@@ -1,92 +1,93 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column,Integer,String
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-Base = declarative_base()
+
 engine = create_engine(
     "postgresql://postgres:admin123@localhost:5432/data_db"
 )
+
+Base = declarative_base()
+
 print("Database Connection Successful")
 
-#CREATE UESER MODEL
+
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
+
+    user_id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     email = Column(String(100), unique=True)
-    posts = relationship("Post", back_populates="user")
 
-# CREATE POST MODEL
+    posts = relationship("Post", back_populates="user", cascade="all, delete")
+
 class Post(Base):
-    __tablename__="posts"
+    __tablename__ = "posts"
+
     post_id = Column(Integer, primary_key=True)
-    title = Column(String(200),nullable=False)
-    user_id = Column(Integer,ForeignKey("users.id"))
-    user = relationship("User", back_populates= "posts")
+    title = Column(String(200), nullable=False)
+
+    user_id = Column(Integer, ForeignKey("users.user_id"))
+    user = relationship("User", back_populates="posts")
+
+
 Base.metadata.create_all(engine)
 
-#CREATE SESSION
 Session = sessionmaker(bind=engine)
 session = Session()
 
-#CREATE USER
-existing_user = session.query(User).filter_by(
-    email="divya@gmail.com"
-).first()
+users_data = [
+    ("John", "john@gmail.com"),
+    ("Alice", "alice@gmail.com"),
+    ("Bob", "bob@gmail.com"),
+    ("David", "david@gmail.com")
+]
 
-if not existing_user:
-    new_user = User(
-        name="Divya",
-        email="divya@gmail.com"
+for name, email in users_data:
+    existing = session.query(User).filter_by(email=email).first()
+    if not existing:
+        user = User(name=name, email=email)
+        session.add(user)
+
+session.commit()
+
+john = session.query(User).filter_by(email="john@gmail.com").first()
+alice = session.query(User).filter_by(email="alice@gmail.com").first()
+bob = session.query(User).filter_by(email="bob@gmail.com").first()
+
+# =========================
+# CREATE POSTS (SAFE RELATIONSHIP WAY)
+# =========================
+if john:
+    session.add_all([
+        Post(title="SQL Basics", user=john),
+        Post(title="Database Design", user=john)
+    ])
+
+if alice:
+    session.add_all([
+        Post(title="Python Guide", user=alice),
+        Post(title="FastAPI Tutorial", user=alice)
+    ])
+
+if bob:
+    session.add(
+        Post(title="PostgreSQL Joins", user=bob)
     )
 
-    session.add(new_user)
-    session.commit()
-
-#CREATE POST
-post1 = Post(
-    title="SQL Basics",
-    user_id=1
-)
-
-post2 = Post(
-    title="Python Basics",
-    user_id=1
-)
-
-session.add(post1)
-session.add(post2)
 session.commit()
 
-# READ USER
-users = session.query(User).all()
+print("\nUSERS:")
+for u in session.query(User).all():
+    print(u.user_id, u.name, u.email)
 
-for user in users:
-    print(user.id, user.name, user.email)
+print("\nPOSTS:")
+for p in session.query(Post).all():
+    print(p.post_id, p.title, p.user_id)
 
-# READ POST
-posts = session.query(Post).all()
+print("\nRELATIONSHIP OUTPUT:")
+user = session.query(User).filter_by(name="John").first()
 
-for post in posts:
-    print(post.post_id, post.title, post.user_id)
-
-#FILTER QUERY
-user = session.query(User).filter_by(name="Divya").first()
-print(user.name)
-#UPDATE USER
-user = session.query(User).filter_by(id=1).first()
-user.name = "Devika"
-user.email = "devika12@gmail.com"
-session.commit()
-#DELETE
-post = session.query(Post).filter_by(post_id=2).first()
-session.delete(post)
-session.commit()
-#RELATIONSHIP QUERY
-user = session.query(User).filter_by(id=1).first()
-print(user.name)
-for post in user.posts:
-    print(post.title)
+if user:
+    print("User:", user.name)
+    for post in user.posts:
+        print("-", post.title)
