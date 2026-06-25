@@ -9,6 +9,7 @@ def add_room_booking(name: str):
     room_bookings.append(name)
     return {"message": "Room booked successfully"}
 
+
 @app.get("/room_booking")
 def get_bookings():
     return room_bookings

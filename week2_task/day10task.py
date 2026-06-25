@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+# Create FastAPI app
 app = FastAPI()
-
+http://127.0.0.1:8000/
 # Store products in memory
 products = []
 
@@ -19,8 +20,13 @@ class Product(BaseModel):
 @app.post("/products")
 def add_product(product: Product):
 
-    product_data = product.model_dump()
-    product_data["id"] = len(products) + 1
+    product_data = {
+        "id": len(products) + 1,
+        "name": product.name,
+        "model": product.model,
+        "cost": product.cost,
+        "character": product.character
+    }
 
     products.append(product_data)
 
@@ -38,8 +44,6 @@ def get_products():
         "products": products
     }
 
-
-# Get Product By ID
 @app.get("/products/{product_id}")
 def get_product(product_id: int):
 
@@ -51,9 +55,6 @@ def get_product(product_id: int):
         status_code=404,
         detail="Product Not Found"
     )
-
-
-# Update Product
 @app.put("/products/{product_id}")
 def update_product(product_id: int, updated_product: Product):
 
@@ -74,9 +75,6 @@ def update_product(product_id: int, updated_product: Product):
         status_code=404,
         detail="Product Not Found"
     )
-
-
-# Delete Product
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
 
@@ -93,7 +91,6 @@ def delete_product(product_id: int):
         status_code=404,
         detail="Product Not Found"
     )
-
-
-
-    
+@app.get("/")
+def home():
+    return {"message": "Welcome to Product API"}
