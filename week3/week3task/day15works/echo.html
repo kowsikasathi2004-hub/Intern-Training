@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Echo Test</title>
+</head>
+
+<body>
+
+<h2>WebSocket Echo Test</h2>
+
+<input id="msg" type="text" placeholder="Enter message">
+<button onclick="sendMessage()">Send</button>
+
+<ul id="messages"></ul>
+
+<script>
+let ws = new WebSocket("ws://127.0.0.1:8000/ws/echo");
+
+// show message from server
+ws.onmessage = (event) => {
+    let li = document.createElement("li");
+    li.innerText = "Server: " + event.data;
+    document.getElementById("messages").appendChild(li);
+};
+
+// send message to server
+function sendMessage() {
+    let input = document.getElementById("msg");
+    ws.send(input.value);
+
+    let li = document.createElement("li");
+    li.innerText = "You: " + input.value;
+    document.getElementById("messages").appendChild(li);
+
+    input.value = "";
+}
+</script>
+
+</body>
+</html>
