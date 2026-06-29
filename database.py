@@ -6,7 +6,5 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
-engine = create_engine(
-    "postgresql://postgres:admin123@localhost:5432/data_db"
-)
+engine = create_engine( "postgresql://postgres:admin123@localhost:5432/data_db")
 print("Database Connection Successful")

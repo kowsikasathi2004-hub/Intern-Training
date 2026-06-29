@@ -1,5 +1,4 @@
 
-
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -11,7 +10,6 @@ INSERT INTO users (name, email) VALUES
 ('Anu', 'anu@gmail.com'),
 ('Kumar', 'kumar@gmail.com'),
 ('Divya', 'divya@gmail.com');
-
 
 
 
